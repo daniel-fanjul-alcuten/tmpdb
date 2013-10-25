@@ -26,6 +26,11 @@ func (db *Database) NewArray(class Class, values ...Object) (obj *Array, err err
 	return writeArray(db, class, values...)
 }
 
+// Creates a new BoolArray Object.
+func (db *Database) NewBoolArray(values ...bool) (obj *Array, err error) {
+	return writeBoolArray(db, values...)
+}
+
 func (db *Database) read(offset, length int64) (data []byte, err error) {
 	data = make([]byte, length)
 	n, err := db.file.ReadAt(data, offset)

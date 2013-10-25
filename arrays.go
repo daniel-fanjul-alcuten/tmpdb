@@ -52,6 +52,28 @@ func writeArray(db *Database, class Class, values ...Object) (obj *Array, err er
 	return
 }
 
+func writeBoolArray(db *Database, values ...bool) (obj *Array, err error) {
+	class := BoolClass{}
+	size, length := int64(len(values)), class.length()
+	data := make([]byte, 0, size*length)
+	for _, value := range values {
+		if value {
+			data = append(data, 1)
+		} else {
+			data = append(data, 0)
+		}
+	}
+	offset, err := db.write(data)
+	if err != nil {
+		return
+	}
+	obj = &Array{db, offset, ArrayClass{size, class}}
+	runtime.SetFinalizer(obj, func(obj *Array) {
+		obj._db.finalize(obj._offset, obj.class.length())
+	})
+	return
+}
+
 func (c ArrayClass) newObject(db *Database, offset int64) Object {
 	obj := &Array{db, offset, c}
 	runtime.SetFinalizer(obj, func(obj *Bool) {

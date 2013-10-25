@@ -72,16 +72,58 @@ func TestArrayValues(t *testing.T) {
 	}
 }
 
+func TestBoolArrayValues(t *testing.T) {
+	file := &MemFile{}
+	db := NewDatabase(file)
+	obj, err := db.NewBoolArray(false, true)
+	if err != nil {
+		t.Error(err)
+	}
+	if c := obj.Class(); c != (ArrayClass{2, BoolClass{}}) {
+		t.Error(c)
+	}
+	if v, ok := obj.Value(0).(*Bool); !ok {
+		t.Error(err)
+	} else if b, err := v.Value(); err != nil {
+		t.Error(err)
+	} else if b {
+		t.Error(b)
+	}
+	if v, ok := obj.Value(1).(*Bool); !ok {
+		t.Error(err)
+	} else if b, err := v.Value(); err != nil {
+		t.Error(err)
+	} else if !b {
+		t.Error(b)
+	}
+	if vv := obj.Values(); len(vv) != 2 {
+		t.Error(len(vv))
+	} else {
+		if v, ok := vv[0].(*Bool); !ok {
+			t.Error(err)
+		} else if b, err := v.Value(); err != nil {
+			t.Error(err)
+		} else if b {
+			t.Error(b)
+		}
+		if v, ok := vv[1].(*Bool); !ok {
+			t.Error(err)
+		} else if b, err := v.Value(); err != nil {
+			t.Error(err)
+		} else if !b {
+			t.Error(b)
+		}
+	}
+}
+
 func TestArrayDealloc(t *testing.T) {
 	file := &MemFile{}
 	db := NewDatabase(file)
-	var b1, b2 *Bool
 	{
-		var err error
-		if b1, err = db.NewBool(false); err != nil {
+		if _, err := db.NewBool(false); err != nil {
 			t.Fatal(err)
 		}
-		if b2, err = db.NewBool(true); err != nil {
+		if _, err := db.NewBool(true); err != nil {
 			t.Fatal(err)
 		}
 		if !bytes.Equal(file.data, []byte{0, 1}) {
@@ -89,7 +131,7 @@ func TestArrayDealloc(t *testing.T) {
 		}
 	}
 	{
-		if _, err := db.NewArray(b1.Class(), b1); err != nil {
+		if _, err := db.NewBoolArray(false); err != nil {
 			t.Error(err)
 		}
 		if !bytes.Equal(file.data, []byte{0, 1, 0}) {
@@ -98,7 +140,7 @@ func TestArrayDealloc(t *testing.T) {
 		runtime.GC()
 	}
 	{
-		if _, err := db.NewArray(b2.Class(), b2); err != nil {
+		if _, err := db.NewBoolArray(true); err != nil {
 			t.Error(err)
 		}
 		if !bytes.Equal(file.data, []byte{0, 1, 0, 1}) {
