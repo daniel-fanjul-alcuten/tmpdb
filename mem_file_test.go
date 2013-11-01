@@ -6,12 +6,13 @@ import (
 )
 
 func TestMemFile(t *testing.T) {
-	memFile := &MemFile{}
-	memFile.data = []byte{1, 2}
-	var file File = memFile
+	file := &MemFile{}
+	file.Data = []byte{1, 2}
+	var reader io.ReaderAt = file
+	var writer io.WriterAt = file
 
 	p := make([]byte, 2)
-	if n, err := file.ReadAt(p, 1); err != io.ErrUnexpectedEOF {
+	if n, err := reader.ReadAt(p, 1); err != io.ErrUnexpectedEOF {
 		t.Error(err)
 	} else {
 		if n != 1 {
@@ -22,14 +23,14 @@ func TestMemFile(t *testing.T) {
 		}
 	}
 
-	if n, err := file.WriteAt([]byte{3, 4}, 1); err != nil {
+	if n, err := writer.WriteAt([]byte{3, 4}, 1); err != nil {
 		t.Error(err)
 	} else if n != 2 {
 		t.Error(n)
 	}
 
 	p = make([]byte, 2)
-	if n, err := file.ReadAt(p, 0); err != nil {
+	if n, err := reader.ReadAt(p, 0); err != nil {
 		t.Error(err)
 	} else if n != 2 {
 		t.Error(n)
@@ -40,7 +41,7 @@ func TestMemFile(t *testing.T) {
 	}
 
 	p = make([]byte, 2)
-	if n, err := file.ReadAt(p, 1); err != nil {
+	if n, err := reader.ReadAt(p, 1); err != nil {
 		t.Error(err)
 	} else if n != 2 {
 		t.Error(n)
